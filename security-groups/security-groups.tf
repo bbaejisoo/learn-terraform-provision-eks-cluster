@@ -1,7 +1,11 @@
+provider "aws" {
+  region = var.region
+}
 
 resource "aws_security_group" "worker_group_mgmt_one" {
   name_prefix = "worker_group_mgmt_one"
-  vpc_id      = module.vpc.vpc_id
+  #vpc_id      = module.vpc.vpc_id
+  vpc_id      = "${data.terraform_remote_state.vpc.outputs.vpc_id}"
 
   ingress {
     from_port = 22
@@ -16,7 +20,8 @@ resource "aws_security_group" "worker_group_mgmt_one" {
 
 resource "aws_security_group" "worker_group_mgmt_two" {
   name_prefix = "worker_group_mgmt_two"
-  vpc_id      = module.vpc.vpc_id
+  #vpc_id      = module.vpc.vpc_id
+  vpc_id      = "${data.terraform_remote_state.vpc.outputs.vpc_id}"
 
   ingress {
     from_port = 22
@@ -31,7 +36,8 @@ resource "aws_security_group" "worker_group_mgmt_two" {
 
 resource "aws_security_group" "all_worker_mgmt" {
   name_prefix = "all_worker_management"
-  vpc_id      = module.vpc.vpc_id
+  #vpc_id      = module.vpc.vpc_id
+  vpc_id      = "${data.terraform_remote_state.vpc.outputs.vpc_id}"
 
   ingress {
     from_port = 22
@@ -44,4 +50,14 @@ resource "aws_security_group" "all_worker_mgmt" {
       "192.168.0.0/16",
     ]
   }
+}
+
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+
+  config = {
+    bucket = "jisoo-terraform-state"
+    region = "ap-northeast-2"
+    key = "tfstate/terraform.tfstate"
+   }
 }
